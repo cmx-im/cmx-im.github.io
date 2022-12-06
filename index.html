@@ -34,6 +34,12 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="#fc466b">
     <!-- Custom Browser Color End -->
 
+    <style>
+      a {
+        color: blueviolet;
+      }
+    </style>
+
   </head>
 
   <body>
@@ -84,36 +90,33 @@
                     Mastodon 是一个开源的、符合 GNU Social 规范的去中心化社交网络，整个 Mastodon 社区是由无数实例组成的。
                     注册本社区后你不仅可以与本实例内的用户互动，并且可以与来自世界各地的其他实例中的用户无缝连接。</p>
                   
-                  <p id="walled-warning" style="display:none; color:palevioletred"><br><strong>⚠️ 检测到您的网络环境阻断了到长毛象中文站的连接！
-                    如果您在中国，请尝试使用<a style="color:palegoldenrod" href="mirrors.html">备用镜像站</a>或
-                    <a style="color:palegoldenrod" href="https://github.com/geph-official/geph4-client/wiki/%E8%BF%B7%E9%9B%BE%E9%80%9A%EF%BC%88%E5%85%8D%E7%BF%BB%E5%A2%99%E9%95%9C%E5%83%8F%EF%BC%89">连接安全的VPN</a>访问本站。</strong></p>
+                  <p id="walled-warning" style="display:none; color:palevioletred"><br><strong>
+                    ⚠️ 检测到您的网络环境阻断了到长毛象中文站的连接！
+                    如果您在中国，请尝试使用下方“镜像入口”或使用VPN，例如
+                    <a href="https://github.com/geph-official/geph4-client/wiki/%E8%BF%B7%E9%9B%BE%E9%80%9A%EF%BC%88%E5%85%8D%E7%BF%BB%E5%A2%99%E9%95%9C%E5%83%8F%EF%BC%89">迷雾通VPN</a>，访问本站。
+                    镜像入口仍然随时可能被墙，请收藏本页面以便日后访问。
+                  </strong></p>
                   
-                  <p id="walled-ok" style="display:none; color:cyan"><br><strong>您的网络环境通畅，可以正常访问长毛象中文站。</strong></p>
-                  
-                  <script>
-                    // Check if m.cmx.im is accessible
-                    fetch('https://m.cmx.im', {mode: 'no-cors'}).then(r=>{
-                      console.log('reachable');
-                      document.getElementById("walled-ok").style.display = "block";
-                    })
-                    .catch(e=>{
-                      console.log('walled');
-                      document.getElementById("walled-warning").style.display = "block";
-                    });
-                  </script>
+                  <p id="proxy-missing-filter-warning" style="display:none; color:palevioletred"><br><strong>
+                    ⚠️ 检测到您已经翻墙成功，但可能没有正确配置VPN的分流规则。
+                    请将 m.cmx.im 这个域名添加到到您的VPN软件的分流规则中，或使用全局代理模式。
+                    否则即使开启了VPN，如果本站不在翻墙规则内，您依然无法正常访问本站。
+                    </strong></p>
+
+                  <p id="walled-ok" style="display:none; color:cyan"><br><strong>✅ 您的网络环境通畅，可以正常访问长毛象中文站。</strong></p>
                   
                   <div class="headline__btnholder">
-                    <a href="https://m.cmx.im/auth/sign_in" target="_blank" class="btn btn-l btn-gradient">
+                    <a id="login" href="https://m.cmx.im/" target="_blank" class="btn btn-l btn-gradient">
                       <span class="btn-border"></span>
                       <span class="btn-hover"></span>
-                      <span class="btn-caption">用户登录</span>
+                      <span class="btn-caption">登录/注册</span>
                     </a>
-                    <a href="https://m.cmx.im/auth/sign_up" target="_blank" class="btn btn-l btn-outline">
+                    <a id="mirror-login" href="https://m.cmx.im/" target="_blank" class="btn btn-l btn-gradient" style="display:none;">
                       <span class="btn-border"></span>
                       <span class="btn-hover"></span>
-                      <span class="btn-caption">申请账户</span>
+                      <span class="btn-caption">镜像入口</span>
                     </a>
-                    <a href="https://cmx-im.github.io/terms.html" target="_blank" class="btn btn-l btn-outline">
+                    <a id="terms" href="terms.html" target="_blank" class="btn btn-l btn-outline">
                       <span class="btn-border"></span>
                       <span class="btn-hover"></span>
                       <span class="btn-caption">社区规则</span>
@@ -233,8 +236,77 @@
     <script src="js/libs.min.js"></script>
     <script src="js/gallery-init.js"></script>
     <script src="js/custom.js"></script>
-    <script src="js/maps/map.js"></script>
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDNMDtmEsvSevM4ztfsbhLfLNZhKHCvWXk"></script>
+    <!-- <script src="js/maps/map.js"></script> -->
+    <!-- <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDNMDtmEsvSevM4ztfsbhLfLNZhKHCvWXk"></script> -->
+                  
+    <script>
+
+      // Randomly select a mirror URL
+      // it's useless for decoying anything at the front-end, 
+      // but it's still slightly better than listing all URLs explicitly...
+      function getRandomMirror() {
+        var mirrors = [
+          "https://cmx.404found.ir",
+          "https://cmx.dccpjn.gob.ar",
+        ];
+
+        // Loop through all mirrors and check if they are accessible
+        // if accessible, add to a new list
+        var reachableMirrors = [];
+        mirrors.forEach(mirror => {
+          fetch(mirror + '/favicon.ico', {mode: 'no-cors'}).then(r=>{
+            // Wait for 1 second before adding to the list
+            console.log(mirror + ' reachable');
+            reachableMirrors.push(mirror);
+          })
+          .catch(e=>{
+            console.log(mirror + ' unreachable');
+          });
+        });
+
+        // Wait for 1 second before checking the list
+        // if the list is empty, return a random mirror
+        setTimeout(function(){
+          if (reachableMirrors.length == 0) {
+            console.log('no reachable mirrors');
+            var randomIndex = Math.floor(Math.random() * mirrors.length);
+            document.getElementById("mirror-login").href = mirrors[randomIndex];
+          } else {
+            console.log('reachable mirrors: ' + reachableMirrors);
+            // Randomly select a mirror from the reachable list
+            var randomMirror = reachableMirrors[Math.floor(Math.random() * reachableMirrors.length)];
+            console.log('random mirror: ' + randomMirror);
+            document.getElementById("mirror-login").href = randomMirror;
+          }
+        }, 1000);
+
+      }
+      
+      // Check if m.cmx.im is accessible
+      fetch('https://m.cmx.im/favicon.ico', {mode: 'no-cors'}).then(r=>{
+        console.log('mastodon reachable');
+        document.getElementById("walled-ok").style.display = "inline-block";
+      })
+      .catch(e=>{
+
+        console.log('mastodon unreachable');
+        document.getElementById("walled-warning").style.display = "inline-block";
+        document.getElementById("mirror-login").style.display = "inline-block";
+        getRandomMirror();
+
+        // Check if youtube.com is accessible
+        fetch('https://www.youtube.com/favicon.ico', {mode: 'no-cors'}).then(r=>{
+          console.log('youtube reachable');
+          document.getElementById("proxy-missing-filter-warning").style.display = "inline-block";
+        })
+        .catch(e=>{
+          console.log('youtube unreachable');
+        })
+
+      })
+
+    </script>
+
     <!-- Load Scripts End -->
 
   </body>
