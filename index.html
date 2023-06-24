@@ -246,8 +246,10 @@
       // but it's still slightly better than listing all URLs explicitly...
       function getRandomMirror() {
         var mirrors = [
-          "https://cmx-finland.pp.ua",
           "https://cmx.dccpjn.gob.ar",
+          "https://cmx.205777.xyz",
+          "https://cmx.000010086.xyz",
+          "https://cmx.0500000.xyz",
         ];
 
         // Loop through all mirrors and check if they are accessible
@@ -264,7 +266,7 @@
           });
         });
 
-        // Wait for 1 second before checking the list
+        // Wait for 5 seconds before checking the list
         // if the list is empty, return a random mirror
         setTimeout(function(){
           if (reachableMirrors.length == 0) {
@@ -273,12 +275,28 @@
             document.getElementById("mirror-login").href = mirrors[randomIndex];
           } else {
             console.log('reachable mirrors: ' + reachableMirrors);
-            // Randomly select a mirror from the reachable list
-            var randomMirror = reachableMirrors[Math.floor(Math.random() * reachableMirrors.length)];
-            console.log('random mirror: ' + randomMirror);
-            document.getElementById("mirror-login").href = randomMirror;
+
+            // Get the current hour
+            var currentHour = new Date().getHours();
+            console.log('currentHour: ' + currentHour);
+
+            // Determine the selected mirror based on the current hour and the number of domains in the list
+            var numberOfMirrors = reachableMirrors.length;
+            console.log('numberOfMirrors: ' + numberOfMirrors);
+            var selectedMirrorIndex = Math.floor(currentHour / (24 / numberOfMirrors));
+            console.log('selectedMirrorIndex: ' + selectedMirrorIndex);
+
+            // Ensure the selectedMirrorIndex is within the array bounds
+            selectedMirrorIndex = Math.min(selectedMirrorIndex, numberOfMirrors - 1);
+
+            // Select the mirror
+            var selectedMirror = reachableMirrors[selectedMirrorIndex];
+            console.log('Selected mirror: ' + selectedMirror);
+
+            document.getElementById("mirror-login").href = selectedMirror;
+            document.getElementById("login").href = selectedMirror;
           }
-        }, 1000);
+        }, 5000);
 
       }
       
@@ -294,13 +312,13 @@
         document.getElementById("mirror-login").style.display = "inline-block";
         getRandomMirror();
 
-        // Check if youtube.com is accessible
-        fetch('https://www.youtube.com/favicon.ico', {mode: 'no-cors'}).then(r=>{
-          console.log('youtube reachable');
+        // Check if scratch.mit.edu is accessible
+        fetch('https://scratch.mit.edu/favicon.ico', {mode: 'no-cors'}).then(r=>{
+          console.log('scratch.mit.edu reachable');
           document.getElementById("proxy-missing-filter-warning").style.display = "inline-block";
         })
         .catch(e=>{
-          console.log('youtube unreachable');
+          console.log('scratch.mit.edu unreachable');
         })
 
       })
