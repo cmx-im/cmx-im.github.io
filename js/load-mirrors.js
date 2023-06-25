@@ -15,7 +15,7 @@ function getRandomMirror() {
     // if accessible, add to a new list
     var reachableMirrors = [];
     mirrors.forEach(mirror => {
-        fetch(mirror + '/favicon.ico', {mode: 'no-cors'}).then(r=>{
+        fetch(mirror + '/api/v1/instance', {mode: 'no-cors'}).then(r=>{
         // Wait for 1 second before adding to the list
         console.log(mirror + ' reachable');
         reachableMirrors.push(mirror);
