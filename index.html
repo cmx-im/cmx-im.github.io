@@ -20,6 +20,7 @@
     <link rel="icon" href="favicon.ico" sizes="any">
     <link rel="apple-touch-icon" href="img/favicon/apple-touch-icon.png">
     <link rel="manifest" href="img/favicon/manifest.webmanifest">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <!-- Template Favicon & Icons End -->
     
     <!-- Template Styles Start -->
@@ -37,6 +38,10 @@
     <style>
       a {
         color: blueviolet;
+      }
+      #mirror-login[disabled] {
+        opacity: 0.5;
+        pointer-events: none;
       }
     </style>
 
@@ -103,18 +108,26 @@
                     否则即使开启了VPN，如果本站不在翻墙规则内，您依然无法正常访问本站。
                     </strong></p>
 
-                  <p id="walled-ok" style="display:none; color:cyan"><br><strong>✅ 您的网络环境通畅，可以正常访问长毛象中文站。</strong></p>
+                  <p id="mirror-addresses-loading" style="display:none;"><br><strong>
+                    <span id="mirror-addresses-loading-spinner" class="spinner-border spinner-border-sm" role="status" aria-hidden="true">
+                      <i class="fas fa-spinner fa-spin"></i>
+                    </span>
+                    镜像地址正在加载中，请等待10秒。加载成功后请点击下方“镜像入口”按钮。
+                  </strong></p>
+
+                  <p id="walled-ok" style="display:none; color:cyan"><br><strong>✅ 您的网络环境通畅，可以正常访问长毛象中文站，不需要镜像。</strong></p>
                   
                   <div class="headline__btnholder">
                     <a id="login" href="https://m.cmx.im/" target="_blank" class="btn btn-l btn-gradient">
                       <span class="btn-border"></span>
                       <span class="btn-hover"></span>
-                      <span class="btn-caption">登录/注册</span>
+                      <span class="btn-caption">直连主站</span>
                     </a>
-                    <a id="mirror-login" href="https://m.cmx.im/" target="_blank" class="btn btn-l btn-gradient" style="display:none;">
+                    <a id="mirror-login" href="https://m.cmx.im/" target="_blank" class="btn btn-l btn-gradient" disabled>
                       <span class="btn-border"></span>
                       <span class="btn-hover"></span>
-                      <span class="btn-caption">镜像入口</span>
+                      <span class="btn-caption">
+                        镜像入口</span>
                     </a>
                     <a id="terms" href="terms.html" target="_blank" class="btn btn-l btn-outline">
                       <span class="btn-border"></span>
@@ -236,94 +249,7 @@
     <script src="js/libs.min.js"></script>
     <script src="js/gallery-init.js"></script>
     <script src="js/custom.js"></script>
-    <!-- <script src="js/maps/map.js"></script> -->
-    <!-- <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDNMDtmEsvSevM4ztfsbhLfLNZhKHCvWXk"></script> -->
-                  
-    <script>
-
-      // Randomly select a mirror URL
-      // it's useless for decoying anything at the front-end, 
-      // but it's still slightly better than listing all URLs explicitly...
-      function getRandomMirror() {
-        var mirrors = [
-          "https://cmx.dccpjn.gob.ar",
-          "https://cmx.205777.xyz",
-          "https://cmx.000010086.xyz",
-          "https://cmx.0500000.xyz",
-        ];
-
-        // Loop through all mirrors and check if they are accessible
-        // if accessible, add to a new list
-        var reachableMirrors = [];
-        mirrors.forEach(mirror => {
-          fetch(mirror + '/favicon.ico', {mode: 'no-cors'}).then(r=>{
-            // Wait for 1 second before adding to the list
-            console.log(mirror + ' reachable');
-            reachableMirrors.push(mirror);
-          })
-          .catch(e=>{
-            console.log(mirror + ' unreachable');
-          });
-        });
-
-        // Wait for 5 seconds before checking the list
-        // if the list is empty, return a random mirror
-        setTimeout(function(){
-          if (reachableMirrors.length == 0) {
-            console.log('no reachable mirrors');
-            var randomIndex = Math.floor(Math.random() * mirrors.length);
-            document.getElementById("mirror-login").href = mirrors[randomIndex];
-          } else {
-            console.log('reachable mirrors: ' + reachableMirrors);
-
-            // Get the current hour
-            var currentHour = new Date().getHours();
-            console.log('currentHour: ' + currentHour);
-
-            // Determine the selected mirror based on the current hour and the number of domains in the list
-            var numberOfMirrors = reachableMirrors.length;
-            console.log('numberOfMirrors: ' + numberOfMirrors);
-            var selectedMirrorIndex = Math.floor(currentHour / (24 / numberOfMirrors));
-            console.log('selectedMirrorIndex: ' + selectedMirrorIndex);
-
-            // Ensure the selectedMirrorIndex is within the array bounds
-            selectedMirrorIndex = Math.min(selectedMirrorIndex, numberOfMirrors - 1);
-
-            // Select the mirror
-            var selectedMirror = reachableMirrors[selectedMirrorIndex];
-            console.log('Selected mirror: ' + selectedMirror);
-
-            document.getElementById("mirror-login").href = selectedMirror;
-            document.getElementById("login").href = selectedMirror;
-          }
-        }, 5000);
-
-      }
-      
-      // Check if m.cmx.im is accessible
-      fetch('https://m.cmx.im/favicon.ico', {mode: 'no-cors'}).then(r=>{
-        console.log('mastodon reachable');
-        document.getElementById("walled-ok").style.display = "inline-block";
-      })
-      .catch(e=>{
-
-        console.log('mastodon unreachable');
-        document.getElementById("walled-warning").style.display = "inline-block";
-        document.getElementById("mirror-login").style.display = "inline-block";
-        getRandomMirror();
-
-        // Check if scratch.mit.edu is accessible
-        fetch('https://scratch.mit.edu/favicon.ico', {mode: 'no-cors'}).then(r=>{
-          console.log('scratch.mit.edu reachable');
-          document.getElementById("proxy-missing-filter-warning").style.display = "inline-block";
-        })
-        .catch(e=>{
-          console.log('scratch.mit.edu unreachable');
-        })
-
-      })
-
-    </script>
+    <script src="js/load-mirrors.js"></script>
 
     <!-- Load Scripts End -->
 
