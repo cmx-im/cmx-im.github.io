@@ -5,7 +5,6 @@
 function getRandomMirror() {
     
     var mirrors = [
-        "https://cmx.dccpjn.gob.ar",
         "https://cmx.205777.xyz",
         "https://cmx.000010086.xyz",
         "https://cmx.0500000.xyz",
